@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Tracker</title>
+  <style>
+    /* styles go here in Task 11 */
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Habit Tracker</h1>
+        <div class="date" id="today-label"></div>
+      </div>
+      <button class="add-btn" onclick="showModal()">+ Add Habit</button>
+    </header>
+
+    <div class="divider"></div>
+
+    <div id="habit-list"></div>
+    <div class="footer" id="footer"></div>
+  </div>
+
+  <!-- Add Habit Modal -->
+  <div id="modal" onclick="if(event.target===this) hideModal()">
+    <div class="modal-box">
+      <h2>New Habit</h2>
+      <input
+        class="modal-input"
+        id="habit-input"
+        type="text"
+        placeholder="e.g. Drink Water"
+        onkeydown="if(event.key==='Enter') addHabit()"
+      >
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="hideModal()">Cancel</button>
+        <button class="btn-primary" onclick="addHabit()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // pure utils — added in Tasks 3–6
+    // DOM functions — added in Tasks 7–10
+  </script>
+</body>
+</html>
