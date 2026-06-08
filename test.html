@@ -45,6 +45,18 @@
       return new Date().toLocaleDateString('en-CA');
     }
 
+    function loadHabits() {
+      try {
+        return JSON.parse(localStorage.getItem('habits') || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function saveHabits(habits) {
+      localStorage.setItem('habits', JSON.stringify(habits));
+    }
+
 
     // ── Tests ────────────────────────────────────────────────────────────────
     section('getToday');
@@ -53,6 +65,19 @@
     assert('format is YYYY-MM-DD (length 10)', today.length, 10);
     assert('contains dashes at positions 4 and 7', today[4] + today[7], '--');
     assert('year is 2026', today.slice(0, 4), '2026');
+
+    section('loadHabits / saveHabits');
+    localStorage.removeItem('habits');
+    assert('returns empty array when nothing saved', loadHabits(), []);
+
+    const sample = [{ id: 'a1', name: 'Test', createdDate: '2026-06-01', completedDates: [] }];
+    saveHabits(sample);
+    assert('round-trips a habit array', loadHabits(), sample);
+
+    localStorage.setItem('habits', 'not valid json{{');
+    assert('returns empty array on corrupt data', loadHabits(), []);
+
+    localStorage.removeItem('habits');
 
 
     // ── Summary ──────────────────────────────────────────────────────────────

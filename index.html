@@ -47,6 +47,18 @@
     function getToday() {
       return new Date().toLocaleDateString('en-CA');
     }
+
+    function loadHabits() {
+      try {
+        return JSON.parse(localStorage.getItem('habits') || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function saveHabits(habits) {
+      localStorage.setItem('habits', JSON.stringify(habits));
+    }
     // DOM functions — added in Tasks 7–10
   </script>
 </body>
