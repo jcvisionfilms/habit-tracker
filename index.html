@@ -201,6 +201,32 @@
       render();
     }
 
+    function toggleMenu(event, id) {
+      event.stopPropagation();
+      const menu = document.getElementById(`menu-${id}`);
+      const isOpen = menu.style.display === 'block';
+      document.querySelectorAll('.menu').forEach(m => m.style.display = 'none');
+      if (!isOpen) menu.style.display = 'block';
+    }
+
+    function deleteHabit(id) {
+      if (!confirm('Delete this habit? This cannot be undone.')) return;
+      const habits = loadHabits().filter(h => h.id !== id);
+      saveHabits(habits);
+      render();
+    }
+
+    function startRename(id) {
+      const habits = loadHabits();
+      const habit = habits.find(h => h.id === id);
+      if (!habit) return;
+      const newName = prompt('Rename habit:', habit.name);
+      if (!newName || !newName.trim()) return;
+      habit.name = newName.trim();
+      saveHabits(habits);
+      render();
+    }
+
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.menu-btn') && !e.target.closest('.menu')) {
         document.querySelectorAll('.menu').forEach(m => m.style.display = 'none');
