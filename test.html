@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Habit Tracker Tests</title>
+  <style>
+    body { font-family: monospace; background: #0f172a; color: #f1f5f9; padding: 24px; }
+    h1 { margin-bottom: 16px; }
+    pre { line-height: 1.7; font-size: 14px; }
+    .pass { color: #4ade80; }
+    .fail { color: #f87171; }
+    .summary { margin-top: 16px; font-size: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Habit Tracker Tests</h1>
+  <pre id="output"></pre>
+  <div class="summary" id="summary"></div>
+
+  <script>
+    let passed = 0;
+    let failed = 0;
+    const out = document.getElementById('output');
+
+    function assert(description, actual, expected) {
+      const ok = JSON.stringify(actual) === JSON.stringify(expected);
+      const span = document.createElement('span');
+      span.className = ok ? 'pass' : 'fail';
+      span.textContent = ok
+        ? `✓ ${description}\n`
+        : `✗ ${description}\n  Expected: ${JSON.stringify(expected)}\n  Got:      ${JSON.stringify(actual)}\n`;
+      out.appendChild(span);
+      ok ? passed++ : failed++;
+    }
+
+    function section(name) {
+      const el = document.createElement('span');
+      el.textContent = `\n— ${name} —\n`;
+      el.style.color = '#94a3b8';
+      out.appendChild(el);
+    }
+
+    // ── Pure functions under test ────────────────────────────────────────────
+    // Paste functions here as you write them in Tasks 3–6
+
+
+    // ── Tests ────────────────────────────────────────────────────────────────
+    // Tests added in Tasks 3–6
+
+
+    // ── Summary ──────────────────────────────────────────────────────────────
+    document.getElementById('summary').textContent =
+      `${passed} passed, ${failed} failed`;
+    document.getElementById('summary').style.color = failed ? '#f87171' : '#4ade80';
+  </script>
+</body>
+</html>
