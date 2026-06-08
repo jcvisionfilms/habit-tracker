@@ -173,6 +173,34 @@
       render();
     }
 
+    function showModal() {
+      document.getElementById('modal').style.display = 'flex';
+      document.getElementById('habit-input').value = '';
+      setTimeout(() => document.getElementById('habit-input').focus(), 50);
+    }
+
+    function hideModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+
+    function addHabit() {
+      const input = document.getElementById('habit-input');
+      const name = input.value.trim();
+      if (!name) return;
+
+      const habits = loadHabits();
+      habits.push({
+        id: Date.now().toString(36),
+        name,
+        createdDate: getToday(),
+        completedDates: []
+      });
+
+      saveHabits(habits);
+      hideModal();
+      render();
+    }
+
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.menu-btn') && !e.target.closest('.menu')) {
         document.querySelectorAll('.menu').forEach(m => m.style.display = 'none');
