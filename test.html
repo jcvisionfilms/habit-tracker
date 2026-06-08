@@ -79,6 +79,16 @@
       return streak;
     }
 
+    function calcOverall(habit, today = getToday()) {
+      const start = new Date(habit.createdDate + 'T00:00:00');
+      const end = new Date(today + 'T00:00:00');
+      const possible = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+      return {
+        completed: habit.completedDates.length,
+        possible
+      };
+    }
+
 
     // ── Tests ────────────────────────────────────────────────────────────────
     section('getToday');
@@ -132,6 +142,29 @@
       { completedDates: ['2026-06-06'] },
       '2026-06-08'
     ), 0);
+
+    section('calcOverall');
+
+    assert('1 possible on the day habit was created', calcOverall(
+      { createdDate: '2026-06-08', completedDates: [] },
+      '2026-06-08'
+    ), { completed: 0, possible: 1 });
+
+    assert('21 possible after 21 days', calcOverall(
+      { createdDate: '2026-05-18', completedDates: [] },
+      '2026-06-07'
+    ), { completed: 0, possible: 21 });
+
+    assert('17/21 matches example from spec', calcOverall(
+      {
+        createdDate: '2026-05-18',
+        completedDates: ['2026-05-18','2026-05-19','2026-05-20','2026-05-21','2026-05-22',
+                         '2026-05-24','2026-05-25','2026-05-26','2026-05-27','2026-05-28',
+                         '2026-05-29','2026-05-31','2026-06-01','2026-06-02','2026-06-03',
+                         '2026-06-04','2026-06-05']
+      },
+      '2026-06-07'
+    ), { completed: 17, possible: 21 });
 
 
     // ── Summary ──────────────────────────────────────────────────────────────

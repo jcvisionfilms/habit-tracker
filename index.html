@@ -81,6 +81,16 @@
 
       return streak;
     }
+
+    function calcOverall(habit, today = getToday()) {
+      const start = new Date(habit.createdDate + 'T00:00:00');
+      const end = new Date(today + 'T00:00:00');
+      const possible = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+      return {
+        completed: habit.completedDates.length,
+        possible
+      };
+    }
     // DOM functions — added in Tasks 7–10
   </script>
 </body>
