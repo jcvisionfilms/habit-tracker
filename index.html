@@ -94,6 +94,75 @@
       };
     }
     // DOM functions — added in Tasks 7–10
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function render() {
+      const habits = loadHabits();
+      const today = getToday();
+      const list = document.getElementById('habit-list');
+      const footer = document.getElementById('footer');
+
+      document.getElementById('today-label').textContent =
+        new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      if (habits.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <p>No habits yet.</p>
+            <p>Click <strong>+ Add Habit</strong> to get started.</p>
+          </div>
+        `;
+        footer.textContent = '';
+        return;
+      }
+
+      const doneCount = habits.filter(h => h.completedDates.includes(today)).length;
+      footer.textContent = `${doneCount} of ${habits.length} habits done today`;
+
+      list.innerHTML = habits.map(habit => {
+        const done = habit.completedDates.includes(today);
+        const streak = calcStreak(habit);
+        const { completed, possible } = calcOverall(habit);
+        return `
+          <div class="habit-row ${done ? 'done' : ''}" data-id="${habit.id}">
+            <div class="habit-left" onclick="toggleComplete('${habit.id}')">
+              <div class="checkbox ${done ? 'checked' : ''}">${done ? '✓' : ''}</div>
+              <span class="habit-name">${escapeHtml(habit.name)}</span>
+            </div>
+            <div class="habit-right">
+              <div class="stat streak">
+                <div class="stat-value">🔥 ${streak}</div>
+                <div class="stat-label">day streak</div>
+              </div>
+              <div class="divider-v"></div>
+              <div class="stat overall">
+                <div class="stat-value">${completed}/${possible}</div>
+                <div class="stat-label">overall</div>
+              </div>
+              <button class="menu-btn" onclick="toggleMenu(event, '${habit.id}')">⋯</button>
+              <div class="menu" id="menu-${habit.id}">
+                <button onclick="startRename('${habit.id}')">Rename</button>
+                <button onclick="deleteHabit('${habit.id}')">Delete</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.menu-btn') && !e.target.closest('.menu')) {
+        document.querySelectorAll('.menu').forEach(m => m.style.display = 'none');
+      }
+    });
+
+    render();
   </script>
 </body>
 </html>
