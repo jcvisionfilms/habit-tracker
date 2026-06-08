@@ -156,6 +156,23 @@
       }).join('');
     }
 
+    function toggleComplete(id) {
+      const habits = loadHabits();
+      const today = getToday();
+      const habit = habits.find(h => h.id === id);
+      if (!habit) return;
+
+      const idx = habit.completedDates.indexOf(today);
+      if (idx === -1) {
+        habit.completedDates.push(today);
+      } else {
+        habit.completedDates.splice(idx, 1);
+      }
+
+      saveHabits(habits);
+      render();
+    }
+
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.menu-btn') && !e.target.closest('.menu')) {
         document.querySelectorAll('.menu').forEach(m => m.style.display = 'none');
