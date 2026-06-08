@@ -57,6 +57,28 @@
       localStorage.setItem('habits', JSON.stringify(habits));
     }
 
+    function calcStreak(habit, today = getToday()) {
+      const dates = new Set(habit.completedDates);
+      let streak = 0;
+      const cursor = new Date(today + 'T00:00:00');
+
+      if (!dates.has(today)) {
+        cursor.setDate(cursor.getDate() - 1);
+      }
+
+      while (true) {
+        const d = cursor.toLocaleDateString('en-CA');
+        if (dates.has(d)) {
+          streak++;
+          cursor.setDate(cursor.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+
+      return streak;
+    }
+
 
     // ── Tests ────────────────────────────────────────────────────────────────
     section('getToday');
@@ -78,6 +100,38 @@
     assert('returns empty array on corrupt data', loadHabits(), []);
 
     localStorage.removeItem('habits');
+
+    section('calcStreak');
+
+    assert('streak is 0 with no completed dates', calcStreak(
+      { completedDates: [] },
+      '2026-06-08'
+    ), 0);
+
+    assert('streak is 1 when only today is done', calcStreak(
+      { completedDates: ['2026-06-08'] },
+      '2026-06-08'
+    ), 1);
+
+    assert('streak is 3 for three consecutive days ending today', calcStreak(
+      { completedDates: ['2026-06-06', '2026-06-07', '2026-06-08'] },
+      '2026-06-08'
+    ), 3);
+
+    assert('streak is 2 when today not done but yesterday and day before are', calcStreak(
+      { completedDates: ['2026-06-06', '2026-06-07'] },
+      '2026-06-08'
+    ), 2);
+
+    assert('streak resets after a gap', calcStreak(
+      { completedDates: ['2026-06-01', '2026-06-07', '2026-06-08'] },
+      '2026-06-08'
+    ), 2);
+
+    assert('streak is 0 when last done was 2 days ago', calcStreak(
+      { completedDates: ['2026-06-06'] },
+      '2026-06-08'
+    ), 0);
 
 
     // ── Summary ──────────────────────────────────────────────────────────────

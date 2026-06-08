@@ -59,6 +59,28 @@
     function saveHabits(habits) {
       localStorage.setItem('habits', JSON.stringify(habits));
     }
+
+    function calcStreak(habit, today = getToday()) {
+      const dates = new Set(habit.completedDates);
+      let streak = 0;
+      const cursor = new Date(today + 'T00:00:00');
+
+      if (!dates.has(today)) {
+        cursor.setDate(cursor.getDate() - 1);
+      }
+
+      while (true) {
+        const d = cursor.toLocaleDateString('en-CA');
+        if (dates.has(d)) {
+          streak++;
+          cursor.setDate(cursor.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+
+      return streak;
+    }
     // DOM functions — added in Tasks 7–10
   </script>
 </body>
