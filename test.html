@@ -41,11 +41,18 @@
     }
 
     // ── Pure functions under test ────────────────────────────────────────────
-    // Paste functions here as you write them in Tasks 3–6
+    function getToday() {
+      return new Date().toLocaleDateString('en-CA');
+    }
 
 
     // ── Tests ────────────────────────────────────────────────────────────────
-    // Tests added in Tasks 3–6
+    section('getToday');
+    const today = getToday();
+    assert('returns a string', typeof today, 'string');
+    assert('format is YYYY-MM-DD (length 10)', today.length, 10);
+    assert('contains dashes at positions 4 and 7', today[4] + today[7], '--');
+    assert('year is 2026', today.slice(0, 4), '2026');
 
 
     // ── Summary ──────────────────────────────────────────────────────────────
