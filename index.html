@@ -777,6 +777,85 @@
       footer.textContent = `Week average: ${avg}% across all habits`;
     }
 
+    function renderMonthView() {
+      const habits = loadHabits();
+      const today = getToday();
+      const list = document.getElementById('habit-list');
+      const footer = document.getElementById('footer');
+
+      const monthNames = ['January','February','March','April','May','June',
+                          'July','August','September','October','November','December'];
+      document.getElementById('today-label').textContent =
+        `${monthNames[currentMonth]} ${currentYear}`;
+
+      const firstDow = new Date(currentYear, currentMonth, 1).getDay();
+      const offset = (firstDow === 0) ? 6 : firstDow - 1;
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      let cellsHtml = '';
+      for (let i = 0; i < offset; i++) {
+        cellsHtml += `<div class="cal-day empty"></div>`;
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        const mm = String(currentMonth + 1).padStart(2, '0');
+        const dd = String(d).padStart(2, '0');
+        const dateStr = `${currentYear}-${mm}-${dd}`;
+        const color = getDayColor(habits, dateStr, today);
+        const isToday = dateStr === today;
+        cellsHtml += `
+          <div class="cal-day ${color}${isToday ? ' cal-today' : ''}">
+            <span>${d}</span>
+          </div>
+        `;
+      }
+
+      const dayLabels = ['M','T','W','T','F','S','S']
+        .map(l => `<div class="cal-day-label">${l}</div>`).join('');
+
+      const now = new Date();
+      const isCurrentMonth = currentYear === now.getFullYear() && currentMonth === now.getMonth();
+
+      list.innerHTML = `
+        <div class="month-nav">
+          <button class="month-arrow" onclick="prevMonth()">&#8249;</button>
+          <span class="month-title">${monthNames[currentMonth]} ${currentYear}</span>
+          <button class="month-arrow" onclick="nextMonth()" ${isCurrentMonth ? 'disabled' : ''}>&#8250;</button>
+        </div>
+        <div class="cal-grid-labels">${dayLabels}</div>
+        <div class="cal-grid">${cellsHtml}</div>
+        <div class="cal-legend">
+          <div class="legend-item"><div class="legend-sq all"></div><span>All done</span></div>
+          <div class="legend-item"><div class="legend-sq some"></div><span>Some done</span></div>
+          <div class="legend-item"><div class="legend-sq none"></div><span>None done</span></div>
+          <div class="legend-item"><div class="legend-sq today-legend"></div><span>Today</span></div>
+        </div>
+      `;
+
+      footer.textContent = '';
+    }
+
+    function prevMonth() {
+      if (currentMonth === 0) {
+        currentMonth = 11;
+        currentYear--;
+      } else {
+        currentMonth--;
+      }
+      renderMonthView();
+    }
+
+    function nextMonth() {
+      const now = new Date();
+      if (currentYear === now.getFullYear() && currentMonth === now.getMonth()) return;
+      if (currentMonth === 11) {
+        currentMonth = 0;
+        currentYear++;
+      } else {
+        currentMonth++;
+      }
+      renderMonthView();
+    }
+
     function toggleComplete(id) {
       const habits = loadHabits();
       const today = getToday();
