@@ -612,6 +612,19 @@
         possible
       };
     }
+
+    function getWeekDates(today = getToday()) {
+      const cursor = new Date(today + 'T00:00:00');
+      const dow = cursor.getDay();
+      const daysFromMonday = (dow === 0) ? 6 : dow - 1;
+      cursor.setDate(cursor.getDate() - daysFromMonday);
+      const dates = [];
+      for (let i = 0; i < 7; i++) {
+        dates.push(cursor.toLocaleDateString('en-CA'));
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      return dates;
+    }
     // DOM functions — added in Tasks 7–10
     function escapeHtml(str) {
       return str

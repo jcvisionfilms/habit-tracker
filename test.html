@@ -91,6 +91,19 @@
       };
     }
 
+    function getWeekDates(today = getToday()) {
+      const cursor = new Date(today + 'T00:00:00');
+      const dow = cursor.getDay();
+      const daysFromMonday = (dow === 0) ? 6 : dow - 1;
+      cursor.setDate(cursor.getDate() - daysFromMonday);
+      const dates = [];
+      for (let i = 0; i < 7; i++) {
+        dates.push(cursor.toLocaleDateString('en-CA'));
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      return dates;
+    }
+
 
     // ── Tests ────────────────────────────────────────────────────────────────
     section('getToday');
@@ -167,6 +180,22 @@
       },
       '2026-06-07'
     ), { completed: 17, possible: 21 });
+
+    section('getWeekDates');
+
+    assert('returns 7 dates', getWeekDates('2026-06-03').length, 7);
+
+    assert('Wednesday → week starts on Monday', getWeekDates('2026-06-03')[0], '2026-06-01');
+
+    assert('Wednesday → week ends on Sunday', getWeekDates('2026-06-03')[6], '2026-06-07');
+
+    assert('Monday → first element is itself', getWeekDates('2026-06-01')[0], '2026-06-01');
+
+    assert('Monday → last element is Sunday', getWeekDates('2026-06-01')[6], '2026-06-07');
+
+    assert('Sunday → week starts 6 days prior', getWeekDates('2026-06-07')[0], '2026-06-01');
+
+    assert('Sunday → last element is itself', getWeekDates('2026-06-07')[6], '2026-06-07');
 
 
     // ── Summary ──────────────────────────────────────────────────────────────
