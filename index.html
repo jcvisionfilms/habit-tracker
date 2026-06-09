@@ -870,7 +870,7 @@
       }
 
       saveHabits(habits);
-      render();
+      renderCurrentView();
     }
 
     function showModal() {
@@ -898,7 +898,7 @@
 
       saveHabits(habits);
       hideModal();
-      render();
+      renderCurrentView();
     }
 
     function toggleMenu(event, id) {
@@ -913,7 +913,7 @@
       if (!confirm('Delete this habit? This cannot be undone.')) return;
       const habits = loadHabits().filter(h => h.id !== id);
       saveHabits(habits);
-      render();
+      renderCurrentView();
     }
 
     function startRename(id) {
@@ -924,7 +924,7 @@
       if (!newName || !newName.trim()) return;
       habit.name = newName.trim();
       saveHabits(habits);
-      render();
+      renderCurrentView();
     }
 
     document.addEventListener('click', (e) => {
