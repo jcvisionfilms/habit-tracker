@@ -104,6 +104,15 @@
       return dates;
     }
 
+    function getDayColor(habits, dateStr, today = getToday()) {
+      if (dateStr > today) return 'future';
+      if (habits.length === 0) return 'none';
+      const done = habits.filter(h => h.completedDates.includes(dateStr)).length;
+      if (done === 0) return 'none';
+      if (done === habits.length) return 'all';
+      return 'some';
+    }
+
 
     // ── Tests ────────────────────────────────────────────────────────────────
     section('getToday');
@@ -196,6 +205,25 @@
     assert('Sunday → week starts 6 days prior', getWeekDates('2026-06-07')[0], '2026-06-01');
 
     assert('Sunday → last element is itself', getWeekDates('2026-06-07')[6], '2026-06-07');
+
+    section('getDayColor');
+
+    const habitsForColor = [
+      { completedDates: ['2026-06-01', '2026-06-02'] },
+      { completedDates: ['2026-06-01'] }
+    ];
+
+    assert('future date returns future', getDayColor(habitsForColor, '2026-12-31', '2026-06-09'), 'future');
+
+    assert('no habits returns none', getDayColor([], '2026-06-01', '2026-06-09'), 'none');
+
+    assert('all habits done returns all', getDayColor(habitsForColor, '2026-06-01', '2026-06-09'), 'all');
+
+    assert('some habits done returns some', getDayColor(habitsForColor, '2026-06-02', '2026-06-09'), 'some');
+
+    assert('no habits done returns none', getDayColor(habitsForColor, '2026-06-03', '2026-06-09'), 'none');
+
+    assert('today is not treated as future even when not completed', getDayColor(habitsForColor, '2026-06-09', '2026-06-09'), 'none');
 
 
     // ── Summary ──────────────────────────────────────────────────────────────
