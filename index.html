@@ -711,6 +711,72 @@
       }).join('');
     }
 
+    function renderWeekView() {
+      const habits = loadHabits();
+      const today = getToday();
+      const weekDates = getWeekDates(today);
+      const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+      const list = document.getElementById('habit-list');
+      const footer = document.getElementById('footer');
+
+      const start = weekDates[0];
+      const end = weekDates[6];
+      const fmt = d => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const year = new Date(today + 'T00:00:00').getFullYear();
+      document.getElementById('today-label').textContent =
+        `Week of ${fmt(start)} – ${fmt(end)}, ${year}`;
+
+      if (habits.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <p>No habits yet.</p>
+            <p>Click <strong>+ Add Habit</strong> to get started.</p>
+          </div>
+        `;
+        footer.textContent = '';
+        return;
+      }
+
+      const headerHtml = `
+        <div class="week-header">
+          <div class="week-name-col"></div>
+          ${dayLabels.map(l => `<div class="week-day-label">${l}</div>`).join('')}
+          <div class="week-pct-col" style="font-size:10px;color:#64748b;">Week</div>
+        </div>
+      `;
+
+      const rowsHtml = habits.map(habit => {
+        const doneCount = weekDates.filter(d => habit.completedDates.includes(d)).length;
+        const pct = Math.round((doneCount / 7) * 100);
+        const pctColor = pct >= 50 ? '#4ade80' : '#f97316';
+        const squares = weekDates.map(d => {
+          const done = habit.completedDates.includes(d);
+          const isToday = d === today;
+          return `<div class="day-sq${done ? ' done' : ''}${isToday ? ' today-sq' : ''}"></div>`;
+        }).join('');
+        return `
+          <div class="week-row">
+            <div class="week-name-col">
+              <span class="habit-name-week">${escapeHtml(habit.name)}</span>
+            </div>
+            ${squares}
+            <div class="week-pct-col">
+              <div class="week-pct-val" style="color:${pctColor}">${pct}%</div>
+              <div class="week-pct-sub">${doneCount}/7</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      list.innerHTML = headerHtml + rowsHtml;
+
+      const avg = Math.round(
+        habits.map(h => weekDates.filter(d => h.completedDates.includes(d)).length / 7 * 100)
+              .reduce((a, b) => a + b, 0) / habits.length
+      );
+      footer.textContent = `Week average: ${avg}% across all habits`;
+    }
+
     function toggleComplete(id) {
       const habits = loadHabits();
       const today = getToday();
