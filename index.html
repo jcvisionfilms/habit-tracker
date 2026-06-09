@@ -628,10 +628,11 @@
 
     function getDayColor(habits, dateStr, today = getToday()) {
       if (dateStr > today) return 'future';
-      if (habits.length === 0) return 'none';
-      const done = habits.filter(h => h.completedDates.includes(dateStr)).length;
+      const activeHabits = habits.filter(h => h.createdDate <= dateStr);
+      if (activeHabits.length === 0) return 'none';
+      const done = activeHabits.filter(h => h.completedDates.includes(dateStr)).length;
       if (done === 0) return 'none';
-      if (done === habits.length) return 'all';
+      if (done === activeHabits.length) return 'all';
       return 'some';
     }
     // DOM functions — added in Tasks 7–10
@@ -785,8 +786,7 @@
 
       const monthNames = ['January','February','March','April','May','June',
                           'July','August','September','October','November','December'];
-      document.getElementById('today-label').textContent =
-        `${monthNames[currentMonth]} ${currentYear}`;
+      document.getElementById('today-label').textContent = '';
 
       const firstDow = new Date(currentYear, currentMonth, 1).getDay();
       const offset = (firstDow === 0) ? 6 : firstDow - 1;

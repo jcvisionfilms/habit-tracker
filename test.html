@@ -106,10 +106,11 @@
 
     function getDayColor(habits, dateStr, today = getToday()) {
       if (dateStr > today) return 'future';
-      if (habits.length === 0) return 'none';
-      const done = habits.filter(h => h.completedDates.includes(dateStr)).length;
+      const activeHabits = habits.filter(h => h.createdDate <= dateStr);
+      if (activeHabits.length === 0) return 'none';
+      const done = activeHabits.filter(h => h.completedDates.includes(dateStr)).length;
       if (done === 0) return 'none';
-      if (done === habits.length) return 'all';
+      if (done === activeHabits.length) return 'all';
       return 'some';
     }
 
@@ -209,8 +210,8 @@
     section('getDayColor');
 
     const habitsForColor = [
-      { completedDates: ['2026-06-01', '2026-06-02'] },
-      { completedDates: ['2026-06-01'] }
+      { createdDate: '2026-05-01', completedDates: ['2026-06-01', '2026-06-02'] },
+      { createdDate: '2026-05-01', completedDates: ['2026-06-01'] }
     ];
 
     assert('future date returns future', getDayColor(habitsForColor, '2026-12-31', '2026-06-09'), 'future');
