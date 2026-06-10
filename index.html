@@ -577,20 +577,37 @@
     <div class="footer" id="footer"></div>
   </div>
 
-  <!-- Add Habit Modal -->
+  <!-- Add Habit / Edit Progress Modal -->
   <div id="modal" onclick="if(event.target===this) hideModal()">
     <div class="modal-box">
-      <h2>New Habit</h2>
-      <input
-        class="modal-input"
-        id="habit-input"
-        type="text"
-        placeholder="e.g. Drink Water"
-        onkeydown="if(event.key==='Enter') addHabit()"
-      >
+      <h2 id="modal-title">New Habit</h2>
+      <div id="name-field">
+        <input
+          class="modal-input"
+          id="habit-input"
+          type="text"
+          placeholder="e.g. Drink Water"
+          onkeydown="if(event.key==='Enter') saveModal()"
+        >
+      </div>
+      <div id="toggle-field">
+        <label class="progress-toggle-label">
+          <input type="checkbox" id="progress-toggle" onchange="toggleProgressFields()">
+          <span>Already tracking this habit?</span>
+        </label>
+      </div>
+      <div id="progress-fields" style="display:none">
+        <label class="field-label">Start date</label>
+        <input class="modal-input" id="start-date-input" type="date">
+        <label class="field-label">Total days done</label>
+        <input class="modal-input" id="total-done-input" type="number" min="0" placeholder="0">
+        <label class="field-label">Current streak</label>
+        <input class="modal-input" id="streak-input" type="number" min="0" placeholder="0">
+      </div>
+      <div id="progress-error" style="display:none"></div>
       <div class="modal-actions">
         <button class="btn-secondary" onclick="hideModal()">Cancel</button>
-        <button class="btn-primary" onclick="addHabit()">Save</button>
+        <button class="btn-primary" id="modal-save-btn" onclick="saveModal()">Save</button>
       </div>
     </div>
   </div>
@@ -599,6 +616,8 @@
     let currentView = 'today';
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
+    let modalMode = 'add';
+    let editingHabitId = null;
 
     // pure utils — added in Tasks 3–6
     function getToday() {
@@ -950,13 +969,41 @@
     }
 
     function showModal() {
-      document.getElementById('modal').style.display = 'flex';
+      modalMode = 'add';
+      editingHabitId = null;
+      document.getElementById('modal-title').textContent = 'New Habit';
+      document.getElementById('name-field').style.display = 'block';
+      document.getElementById('toggle-field').style.display = 'block';
+      document.getElementById('progress-toggle').checked = false;
+      document.getElementById('progress-fields').style.display = 'none';
+      document.getElementById('progress-error').style.display = 'none';
       document.getElementById('habit-input').value = '';
+      document.getElementById('start-date-input').value = '';
+      document.getElementById('total-done-input').value = '';
+      document.getElementById('streak-input').value = '';
+      document.getElementById('modal-save-btn').textContent = 'Save';
+      document.getElementById('modal').style.display = 'flex';
       setTimeout(() => document.getElementById('habit-input').focus(), 50);
     }
 
     function hideModal() {
       document.getElementById('modal').style.display = 'none';
+    }
+
+    function toggleProgressFields() {
+      const checked = document.getElementById('progress-toggle').checked;
+      document.getElementById('progress-fields').style.display = checked ? 'block' : 'none';
+      if (checked && !document.getElementById('start-date-input').value) {
+        document.getElementById('start-date-input').value = getToday();
+      }
+    }
+
+    function saveModal() {
+      if (modalMode === 'add') {
+        addHabit();
+      } else {
+        saveEditProgress();
+      }
     }
 
     function addHabit() {
@@ -965,11 +1012,32 @@
       if (!name) return;
 
       const habits = loadHabits();
+      const today = getToday();
+      let createdDate = today;
+      let completedDates = [];
+
+      if (document.getElementById('progress-toggle').checked) {
+        const startDate = document.getElementById('start-date-input').value;
+        const totalDone = parseInt(document.getElementById('total-done-input').value) || 0;
+        const streak = parseInt(document.getElementById('streak-input').value) || 0;
+
+        const error = validateProgress(startDate, totalDone, streak, today);
+        if (error) {
+          const errEl = document.getElementById('progress-error');
+          errEl.textContent = error;
+          errEl.style.display = 'block';
+          return;
+        }
+
+        createdDate = startDate;
+        completedDates = generateCompletedDates(startDate, totalDone, streak, today);
+      }
+
       habits.push({
         id: Date.now().toString(36),
         name,
-        createdDate: getToday(),
-        completedDates: []
+        createdDate,
+        completedDates
       });
 
       saveHabits(habits);
