@@ -114,6 +114,44 @@
       return 'some';
     }
 
+    function generateCompletedDates(startDate, totalDone, streak, today = getToday()) {
+      if (totalDone === 0) return [];
+
+      const streakDates = [];
+      const cur = new Date(today + 'T00:00:00');
+      for (let i = 0; i < streak; i++) {
+        streakDates.unshift(cur.toLocaleDateString('en-CA'));
+        cur.setDate(cur.getDate() - 1);
+      }
+      if (streak === 0) {
+        cur.setDate(cur.getDate() - 1);
+      }
+
+      const pool = [];
+      const poolCursor = new Date(startDate + 'T00:00:00');
+      while (poolCursor <= cur) {
+        pool.push(poolCursor.toLocaleDateString('en-CA'));
+        poolCursor.setDate(poolCursor.getDate() + 1);
+      }
+
+      const extra = pool.slice(0, totalDone - streak);
+      return [...extra, ...streakDates].sort();
+    }
+
+    function validateProgress(startDate, totalDone, streak, today = getToday()) {
+      if (!startDate) return 'Please enter a start date';
+      if (startDate > today) return "Start date can't be in the future";
+      if (totalDone < 0 || streak < 0) return 'Values must be 0 or greater';
+      if (streak > totalDone) return "Streak can't be more than total days done";
+      const [sy, sm, sd] = startDate.split('-').map(Number);
+      const [ey, em, ed] = today.split('-').map(Number);
+      const daysSinceStart = Math.floor(
+        (Date.UTC(ey, em - 1, ed) - Date.UTC(sy, sm - 1, sd)) / (1000 * 60 * 60 * 24)
+      ) + 1;
+      if (totalDone > daysSinceStart) return `Total days done can't exceed days since start (${daysSinceStart})`;
+      return null;
+    }
+
 
     // ── Tests ────────────────────────────────────────────────────────────────
     section('getToday');
@@ -225,6 +263,55 @@
     assert('no habits done returns none', getDayColor(habitsForColor, '2026-06-03', '2026-06-09'), 'none');
 
     assert('today is not treated as future even when not completed', getDayColor(habitsForColor, '2026-06-09', '2026-06-09'), 'none');
+
+    section('generateCompletedDates');
+
+    assert('returns empty array when totalDone=0',
+      generateCompletedDates('2026-06-01', 0, 0, '2026-06-10'), []);
+
+    assert('returns streak dates only when totalDone equals streak',
+      generateCompletedDates('2026-06-01', 3, 3, '2026-06-10'),
+      ['2026-06-08', '2026-06-09', '2026-06-10']);
+
+    assert('result length equals totalDone',
+      generateCompletedDates('2026-05-20', 17, 4, '2026-06-10').length, 17);
+
+    assert('last date in result is today when streak > 0',
+      generateCompletedDates('2026-05-20', 5, 2, '2026-06-10').slice(-1)[0], '2026-06-10');
+
+    assert('second-to-last date is yesterday when streak >= 2',
+      generateCompletedDates('2026-05-20', 5, 2, '2026-06-10').slice(-2)[0], '2026-06-09');
+
+    assert('today not in result when streak = 0',
+      generateCompletedDates('2026-06-01', 3, 0, '2026-06-10').includes('2026-06-10'), false);
+
+    assert('result is sorted ascending', (() => {
+      const dates = generateCompletedDates('2026-05-20', 10, 3, '2026-06-10');
+      return dates.join(',') === [...dates].sort().join(',');
+    })(), true);
+
+    section('validateProgress');
+
+    assert('returns null for valid inputs',
+      validateProgress('2026-05-20', 17, 4, '2026-06-10'), null);
+
+    assert('returns null when totalDone=0 and streak=0',
+      validateProgress('2026-06-01', 0, 0, '2026-06-10'), null);
+
+    assert('returns error for future start date',
+      validateProgress('2026-12-31', 0, 0, '2026-06-10'), "Start date can't be in the future");
+
+    assert('returns error when streak > totalDone',
+      validateProgress('2026-06-01', 3, 5, '2026-06-10'), "Streak can't be more than total days done");
+
+    assert('returns error when totalDone > days since start',
+      validateProgress('2026-06-09', 100, 0, '2026-06-10'), "Total days done can't exceed days since start (2)");
+
+    assert('returns error for negative values',
+      validateProgress('2026-06-01', -1, 0, '2026-06-10'), 'Values must be 0 or greater');
+
+    assert('returns error for empty startDate',
+      validateProgress('', 0, 0, '2026-06-10'), 'Please enter a start date');
 
 
     // ── Summary ──────────────────────────────────────────────────────────────

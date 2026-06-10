@@ -635,6 +635,44 @@
       if (done === activeHabits.length) return 'all';
       return 'some';
     }
+
+    function generateCompletedDates(startDate, totalDone, streak, today = getToday()) {
+      if (totalDone === 0) return [];
+
+      const streakDates = [];
+      const cur = new Date(today + 'T00:00:00');
+      for (let i = 0; i < streak; i++) {
+        streakDates.unshift(cur.toLocaleDateString('en-CA'));
+        cur.setDate(cur.getDate() - 1);
+      }
+      if (streak === 0) {
+        cur.setDate(cur.getDate() - 1);
+      }
+
+      const pool = [];
+      const poolCursor = new Date(startDate + 'T00:00:00');
+      while (poolCursor <= cur) {
+        pool.push(poolCursor.toLocaleDateString('en-CA'));
+        poolCursor.setDate(poolCursor.getDate() + 1);
+      }
+
+      const extra = pool.slice(0, totalDone - streak);
+      return [...extra, ...streakDates].sort();
+    }
+
+    function validateProgress(startDate, totalDone, streak, today = getToday()) {
+      if (!startDate) return 'Please enter a start date';
+      if (startDate > today) return "Start date can't be in the future";
+      if (totalDone < 0 || streak < 0) return 'Values must be 0 or greater';
+      if (streak > totalDone) return "Streak can't be more than total days done";
+      const [sy, sm, sd] = startDate.split('-').map(Number);
+      const [ey, em, ed] = today.split('-').map(Number);
+      const daysSinceStart = Math.floor(
+        (Date.UTC(ey, em - 1, ed) - Date.UTC(sy, sm - 1, sd)) / (1000 * 60 * 60 * 24)
+      ) + 1;
+      if (totalDone > daysSinceStart) return `Total days done can't exceed days since start (${daysSinceStart})`;
+      return null;
+    }
     // DOM functions — added in Tasks 7–10
     function escapeHtml(str) {
       return str
