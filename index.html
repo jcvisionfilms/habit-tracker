@@ -693,6 +693,7 @@
       return 'some';
     }
 
+    // Caller must run validateProgress first — this function silently truncates if totalDone > available pool
     function generateCompletedDates(startDate, totalDone, streak, today = getToday()) {
       if (totalDone === 0) return [];
 
