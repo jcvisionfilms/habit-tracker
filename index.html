@@ -799,6 +799,7 @@
               <button class="menu-btn" onclick="toggleMenu(event, '${habit.id}')">⋯</button>
               <div class="menu" id="menu-${habit.id}">
                 <button onclick="startRename('${habit.id}')">Rename</button>
+                <button onclick="showEditProgress('${habit.id}')">Edit Progress</button>
                 <button onclick="deleteHabit('${habit.id}')">Delete</button>
               </div>
             </div>
@@ -1068,6 +1069,51 @@
       if (!newName || !newName.trim()) return;
       habit.name = newName.trim();
       saveHabits(habits);
+      renderCurrentView();
+    }
+
+    function showEditProgress(id) {
+      const habits = loadHabits();
+      const habit = habits.find(h => h.id === id);
+      if (!habit) return;
+
+      modalMode = 'edit-progress';
+      editingHabitId = id;
+      document.getElementById('modal-title').textContent = 'Edit Progress';
+      document.getElementById('name-field').style.display = 'none';
+      document.getElementById('toggle-field').style.display = 'none';
+      document.getElementById('progress-fields').style.display = 'block';
+      document.getElementById('progress-error').style.display = 'none';
+      document.getElementById('start-date-input').value = habit.createdDate;
+      document.getElementById('total-done-input').value = habit.completedDates.length;
+      document.getElementById('streak-input').value = calcStreak(habit);
+      document.getElementById('modal-save-btn').textContent = 'Save Progress';
+      document.getElementById('modal').style.display = 'flex';
+      setTimeout(() => document.getElementById('start-date-input').focus(), 50);
+    }
+
+    function saveEditProgress() {
+      const today = getToday();
+      const startDate = document.getElementById('start-date-input').value;
+      const totalDone = parseInt(document.getElementById('total-done-input').value) || 0;
+      const streak = parseInt(document.getElementById('streak-input').value) || 0;
+
+      const error = validateProgress(startDate, totalDone, streak, today);
+      if (error) {
+        const errEl = document.getElementById('progress-error');
+        errEl.textContent = error;
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const habits = loadHabits();
+      const habit = habits.find(h => h.id === editingHabitId);
+      if (!habit) return;
+
+      habit.createdDate = startDate;
+      habit.completedDates = generateCompletedDates(startDate, totalDone, streak, today);
+      saveHabits(habits);
+      hideModal();
       renderCurrentView();
     }
 
